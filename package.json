@@ -1,0 +1,30 @@
+{
+  "name": "sahayak",
+  "version": "1.1.0",
+  "description": "Sahayak — a voice-first web app that helps gig and daily-wage workers find the government benefit they qualify for, in 6 Indian languages. 12 schemes, no dependencies.",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/test.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "keywords": [
+    "gig-workers",
+    "government-schemes",
+    "benefits",
+    "voice",
+    "web-speech",
+    "indic",
+    "accessibility",
+    "social-security",
+    "hackathon"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR-USERNAME/sahayak.git"
+  }
+}
