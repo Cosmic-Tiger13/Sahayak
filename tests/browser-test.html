@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sahayak — in-browser tests</title>
+<style>
+  body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:24px;background:#eef3ef;color:#132a1d}
+  h1{font-size:20px}
+  .sum{font-size:17px;font-weight:700;margin:14px 0}
+  .ok{color:#0f7a3d}.bad{color:#c0342f}
+  ul{line-height:1.7;font-size:14.5px}
+  li.fail{color:#c0342f;font-weight:600}
+  code{background:#e3ebe6;padding:1px 5px;border-radius:5px}
+</style>
+</head>
+<body>
+<h1>Sahayak — in-browser tests</h1>
+<p>Runs the same checks as <code>tests/test.js</code>, in the browser, using the exact
+scripts the app loads. Open directly, or run <code>npm start</code> then visit
+<code>http://localhost:8080/tests/browser-test.html</code>.</p>
+<div class="sum" id="sum">Running…</div>
+<ul id="out"></ul>
+
+<script src="../js/languages.js"></script>
+<script src="../js/schemes.js"></script>
+<script src="../js/parser.js"></script>
+<script>
+  var pass = 0, fail = 0, out = document.getElementById('out');
+  function eq(name, got, want) {
+    if (got === want) { pass++; }
+    else { fail++; var li = document.createElement('li'); li.className = 'fail';
+      li.textContent = 'FAIL | ' + name + ' => ' + JSON.stringify(got) + ' (want ' + JSON.stringify(want) + ')';
+      out.appendChild(li); }
+  }
+  var M = SahayakSchemes.matchBest, EL = SahayakSchemes.eligible, P = SahayakParser;
+
+  // matching
+  eq('10k/25 -> pmsym', M({income:10000,age:25,workType:'delivery'}).best, 'pmsym');
+  eq('10k/50 -> ayushman', M({income:10000,age:50,workType:'other'}).best, 'ayushman');
+  eq('20k/30 -> ayushman', M({income:20000,age:30,workType:'other'}).best, 'ayushman');
+  eq('40k/30 -> apy', M({income:40000,age:30,workType:'other'}).best, 'apy');
+  eq('vendor -> svanidhi', M({income:12000,age:30,workType:'street_vendor'}).best, 'svanidhi');
+  eq('artisan -> vishwakarma', M({income:12000,age:30,workType:'artisan'}).best, 'vishwakarma');
+  eq('45k/55 -> eshram', M({income:45000,age:55,workType:'other'}).best, 'eshram');
+  // eligibility
+  eq('25yo eligible pmsym', EL({income:10000,age:25,workType:'other'}).indexOf('pmsym')!==-1, true);
+  eq('50yo not eligible apy', EL({income:10000,age:50,workType:'other'}).indexOf('apy')===-1, true);
+  // work type
+  eq('delivery', P.detectWorkType('delivery bike'), 'delivery');
+  eq('street vendor', P.detectWorkType('sell vegetables on the street'), 'street_vendor');
+  eq('carpenter', P.detectWorkType('I am a carpenter'), 'artisan');
+  // parsing
+  eq('digits', P.toNumber('10000'), 10000);
+  eq('10k', P.toNumber('10k'), 10000);
+  eq('das hazaar', P.toNumber('das hazaar'), 10000);
+  eq('Hindi पंद्रह हज़ार', P.toNumber('पंद्रह हज़ार'), 15000);
+  eq('Tamil பத்து ஆயிரம்', P.toNumber('பத்து ஆயிரம்'), 10000);
+  eq('age 28', P.parseAge('28'), 28);
+  eq('yes haan', P.isYes('haan'), true);
+  eq('no nahi', P.isNo('nahi'), true);
+  eq('switch hindi', P.detectLangSwitch('Hindi','en-IN'), 'hi-IN');
+  // data
+  eq('6 languages', Object.keys(SahayakLangs).length, 6);
+  eq('12 schemes', SahayakSchemes.SCHEMES.length, 12);
+
+  document.getElementById('sum').innerHTML =
+    '<span class="' + (fail ? 'bad' : 'ok') + '">' + pass + ' passed, ' + fail + ' failed</span>';
+</script>
+</body>
+</html>
